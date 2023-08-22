@@ -1,23 +1,36 @@
 #!/usr/bin/python3
-'''
-Python script that returns information using REST API
-'''
+"""Using a rest API, for a given employee ID,
+returns information about his/her TODO list progress
+"""
+
 import requests
-import sys
+from sys import argv
+
 
 if __name__ == "__main__":
-    get_emp_id = sys.argv[1]
-    user_url = (f'https://jsonplaceholder.typicode.com/users/{get_emp_id}')
-    get_emp_data = requests.get(user_url).json()
-    todos_url = (
-        f'https://jsonplaceholder.typicode.com/todos?userId={get_emp_id}')
-    get_emp_tasks = requests.get(todos_url).json()
+    NUMBER_OF_DONE_TASKS = 0
+    TOTAL_NUMBER_OF_TASKS = 0
+    TASK_TITLE = []
 
-    done_tasks = [task for task in get_emp_tasks if task.get("completed")]
+    r_todos = requests.get("https://jsonplaceholder.typicode.com/todos/")
+    dict_todos = r_todos.json()
 
-    print(
-        f"Employee {get_emp_data['name']} is done with "
-        f"tasks({len(done_tasks)}/{len(get_emp_tasks)}):"
-    )
-    for task in done_tasks:
-        print("\t", task["title"])
+    r_users = requests.get("https://jsonplaceholder.typicode.com/users/")
+    dict_users = r_users.json()
+
+    for key in dict_users:
+        if key.get("id") == int(argv[1]):
+            EMPLOYEE_NAME = key.get("name")
+
+    for key in dict_todos:
+        if key.get("userId") == int(argv[1]):
+            TOTAL_NUMBER_OF_TASKS += 1
+            if key.get("completed") is True:
+                NUMBER_OF_DONE_TASKS += 1
+                TASK_TITLE.append(key.get("title"))
+
+    print("Employee {} is done with tasks({}/{}):".format(EMPLOYEE_NAME,
+          NUMBER_OF_DONE_TASKS, TOTAL_NUMBER_OF_TASKS))
+
+    for title in TASK_TITLE:
+        print("\t {}".format(title))
